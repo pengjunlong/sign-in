@@ -20,6 +20,8 @@ env:
   JAVA_VERSION: '17'
   JAVA_DISTRIBUTION: 'temurin'
   APP_SLUG: 'cm-sign-in'          # APK 文件名前缀（纯英文，避免中文被 URL 编码）
+  # gradle-wrapper.jar 官方下载地址（SHA-256 由 gradle/actions/setup-gradle 校验）
+  WRAPPER_JAR_URL: 'https://github.com/gradle/gradle/raw/v8.6.0/gradle/wrapper/gradle-wrapper.jar'
 
 # ════════════════════════════════════════════════════════════════════════════════
 # Job 1: PR Build & Lint（仅 PR 触发）
@@ -40,15 +42,23 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
-          cache: gradle
+          # 不在此处配置 gradle cache，交由 setup-gradle 统一管理
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: wrapper
+      # ── 下载 gradle-wrapper.jar（仓库中不提交 jar，CI 运行时动态获取）────────
+      - name: Download gradle-wrapper.jar
+        run: |
+          mkdir -p gradle/wrapper
+          curl -fsSL "https://services.gradle.org/distributions/gradle-8.6-bin.zip" -o /tmp/gradle.zip
+          unzip -joq /tmp/gradle.zip "gradle-8.6/lib/gradle-wrapper.jar" -d gradle/wrapper/ 2>/dev/null || \
+          curl -fsSL "https://raw.githubusercontent.com/gradle/gradle/v8.6.0/gradle/wrapper/gradle-wrapper.jar" \
+               -o gradle/wrapper/gradle-wrapper.jar
+          echo "✅ gradle-wrapper.jar ready ($(du -sh gradle/wrapper/gradle-wrapper.jar | cut -f1))"
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
       # ── Lint ──────────────────────────────────────────────────────────────────
       - name: Run Lint
@@ -59,8 +69,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: lint-results-${{ github.sha }}
-          path: app/build/reports/lint-results*.html
+          path: app/build/reports/lint-results-*.html
           retention-days: 7
+          if-no-files-found: warn
 
       # ── Debug APK ─────────────────────────────────────────────────────────────
       - name: Build Debug APK
@@ -94,15 +105,22 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
-          cache: gradle
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: wrapper
+      # ── 下载 gradle-wrapper.jar ───────────────────────────────────────────────
+      - name: Download gradle-wrapper.jar
+        run: |
+          mkdir -p gradle/wrapper
+          curl -fsSL "https://services.gradle.org/distributions/gradle-8.6-bin.zip" -o /tmp/gradle.zip
+          unzip -joq /tmp/gradle.zip "gradle-8.6/lib/gradle-wrapper.jar" -d gradle/wrapper/ 2>/dev/null || \
+          curl -fsSL "https://raw.githubusercontent.com/gradle/gradle/v8.6.0/gradle/wrapper/gradle-wrapper.jar" \
+               -o gradle/wrapper/gradle-wrapper.jar
+          echo "✅ gradle-wrapper.jar ready ($(du -sh gradle/wrapper/gradle-wrapper.jar | cut -f1))"
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
       # ── 从 Tag 解析版本号 ──────────────────────────────────────────────────────
       - name: Extract version from tag
@@ -123,7 +141,7 @@ jobs:
         run: |
           APP_NAME=$(grep '<string name="app_name">' app/src/main/res/values/strings.xml \
             | sed 's/.*<string name="app_name">\(.*\)<\/string>.*/\1/')
-          # 若 strings.xml 中文件路径正确，此处应输出「移动自动签到」
+          # 此处应输出「移动自动签到」
           echo "app_name=$APP_NAME" >> $GITHUB_OUTPUT
           echo "🏷️ app_name: $APP_NAME"
 
@@ -136,7 +154,7 @@ jobs:
           echo "✅ Keystore decoded to release.jks"
 
       # ── 构建签名 Release APK ───────────────────────────────────────────────────
-      # app/build.gradle.kts 通过 project.hasProperty 读取以下 -P 参数
+      # app/build.gradle.kts 通过 project.findProperty 读取以下 -P 参数
       - name: Build Release APK
         env:
           KEYSTORE_FILE: ${{ github.workspace }}/release.jks
@@ -158,7 +176,8 @@ jobs:
         run: |
           mkdir -p artifacts
           TAG="${{ steps.version.outputs.tag }}"
-          # assembleRelease 产物路径：app/build/outputs/apk/release/app-release-unsigned.apk
+          # assembleRelease 产物路径：app/build/outputs/apk/release/app-release.apk（已签名）
+          # 或 app-release-unsigned.apk（未签名，使用 -P 注入签名参数时为 app-release.apk）
           for f in app/build/outputs/apk/release/*.apk; do
             [ -f "$f" ] && cp "$f" "artifacts/${APP_SLUG}-${TAG}.apk"
           done

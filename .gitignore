@@ -20,6 +20,8 @@ release/
 .gradle/
 build/
 app/build/
+# wrapper jar 由 CI 动态下载，不提交到仓库
+gradle/wrapper/gradle-wrapper.jar
 
 # Local configuration file (sdk path, etc)
 local.properties
