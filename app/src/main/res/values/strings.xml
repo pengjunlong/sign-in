@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">移动自动签到</string>
+    <string name="accessibility_service_label">中国移动自动签到</string>
+    <string name="accessibility_service_description">自动检测并跳过中国移动 App 开屏广告，然后点击签到入口完成每日签到，无需手动操作。</string>
+</resources>
+

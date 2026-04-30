@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <!-- 标题 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:text="中国移动自动签到"
+        android:textColor="#212121"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="基于 Android 无障碍服务"
+        android:textColor="#757575"
+        android:textSize="14sp" />
+
+    <!-- 分隔线 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="24dp"
+        android:background="#E0E0E0" />
+
+    <!-- 状态卡片 -->
+    <TextView
+        android:id="@+id/tv_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:padding="16dp"
+        android:text="检测服务状态中..."
+        android:textColor="#FFFFFF"
+        android:textSize="15sp"
+        android:lineSpacingMultiplier="1.4"
+        android:background="#9E9E9E" />
+
+    <!-- 说明步骤 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:text="使用步骤："
+        android:textColor="#424242"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:lineSpacingMultiplier="1.6"
+        android:text="1. 点击「开启无障碍服务」按钮\n2. 在系统设置中找到「中国移动自动签到」并开启\n3. 返回本页面，点击「打开中国移动 App」\n4. App 将自动跳过广告 → 点击签到入口 → 完成签到"
+        android:textColor="#616161"
+        android:textSize="14sp" />
+
+    <!-- 开启无障碍服务按钮 -->
+    <Button
+        android:id="@+id/btn_open_accessibility"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginTop="32dp"
+        android:backgroundTint="#1976D2"
+        android:text="开启无障碍服务"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp" />
+
+    <!-- 打开中国移动 App 按钮（仅服务开启后显示） -->
+    <Button
+        android:id="@+id/btn_launch_china_mobile"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginTop="12dp"
+        android:backgroundTint="#388E3C"
+        android:text="打开中国移动 App 并开始签到"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:visibility="gone" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:gravity="center"
+        android:text="签到过程中请勿触碰屏幕"
+        android:textColor="#9E9E9E"
+        android:textSize="12sp" />
+
+</LinearLayout>
+
